@@ -22,6 +22,7 @@
 #include "nrfx_rtc.h"
 #include "nrf_drv_rtc.h"
 #include "nrfx_power.h"
+#include "app_timer.h"
 
 
 
@@ -41,22 +42,25 @@ static uint32_t              m_adc_evt_counter;
 
 static nrf_drv_pwm_t m_pwm0 = NRF_DRV_PWM_INSTANCE(0); // Added in
 
+APP_TIMER_DEF(temp_timer_id);     /**< Handler for repeated timer - TEMP. */
+APP_TIMER_DEF(saadc_timer_id);  /**< Handler for repeated timer - SAADC. */
 
-uint32_t b_period[3] = {1000,500,100};
+
+uint32_t b_period[3] = {32768,32768/2,3277};
 uint32_t period_counter = 0;
 int32_t volatile temp;
 
 static nrf_drv_rtc_t timer = NRF_DRV_RTC_INSTANCE(0);
-static nrf_drv_timer_t timer1 = NRF_DRV_TIMER_INSTANCE(1); // 2nd timer instance for temp
+//static nrf_drv_timer_t timer1 = NRF_DRV_TIMER_INSTANCE(1); // 2nd timer instance for temp
 
 void rtc_handler(nrf_drv_rtc_int_type_t int_type){
     nrf_drv_rtc_counter_clear(&timer);
     nrf_drv_rtc_int_enable(&timer, NRF_RTC_INT_COMPARE0_MASK);
-    nrf_drv_rtc_cc_set(&timer,0,3UL * 2,true);
+    nrf_drv_rtc_cc_set(&timer,0,b_period[period_counter],true);
 }
 
 
-void timer1_dummy_handler(nrf_timer_event_t event_type, void * p_context){}
+//void timer1_dummy_handler(nrf_timer_event_t event_type, void * p_context){}
 
 static void led_blinking_setup()
 {
@@ -71,7 +75,7 @@ static void led_blinking_setup()
 
 
 //    nrf_drv_rtc_cc_set(&timer, 0, 1000, true);
-    err_code = nrf_drv_rtc_cc_set(&timer,0,3UL * 2,true);
+    err_code = nrf_drv_rtc_cc_set(&timer,0,32768,true);
     APP_ERROR_CHECK(err_code);
 
     err_code = nrf_drv_ppi_channel_alloc(&ppi_channel);
@@ -92,33 +96,11 @@ static void led_blinking_setup()
 
 static void temp_setup()
 {
-    uint32_t compare_evt_addr;
-    uint32_t temp_task_addr;
-    nrf_ppi_channel_t ppi_channel;
-    ret_code_t err_code;
-
     // TEMP
     nrf_temp_init();
     NRFX_IRQ_ENABLE(TEMP_IRQn);
     NRF_TEMP->INTENSET = 0x01;
     NRF_TEMP->EVENTS_DATARDY = 0;
-
-//    nrf_drv_timer_extended_compare(&timer1, NRF_TIMER_CC_CHANNEL2, 10000 * 1000UL, NRF_TIMER_SHORT_COMPARE2_CLEAR_MASK, false);
-    nrf_drv_timer_extended_compare(&timer1, NRF_TIMER_CC_CHANNEL2, 2000 * 1000UL, NRF_TIMER_SHORT_COMPARE2_CLEAR_MASK, false);
-    nrf_drv_timer_compare(&timer1, NRF_TIMER_CC_CHANNEL1, 1999 * 1000UL, false);
-
-    err_code = nrf_drv_ppi_channel_alloc(&ppi_channel);
-    APP_ERROR_CHECK(err_code);
-
-    compare_evt_addr = nrf_drv_timer_event_address_get(&timer1, NRF_TIMER_EVENT_COMPARE2);
-//    temp_task_addr = nrf_temp_task_address_get(&temo_type, start);
-    temp_task_addr = 0x4000C000; // Found the task address manually
-
-    err_code = nrf_drv_ppi_channel_assign(ppi_channel, compare_evt_addr, temp_task_addr);
-    APP_ERROR_CHECK(err_code);
-
-    err_code = nrf_drv_ppi_channel_enable(ppi_channel);
-    APP_ERROR_CHECK(err_code);
 }
 
 // Button 1 interrupt routine
@@ -128,8 +110,9 @@ void in_pin_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
     period_counter++;
     if(period_counter == 3)
     period_counter=0;
-    nrf_drv_rtc_cc_set(&timer, 0, b_period[period_counter] * 1000UL, true);
     nrf_drv_rtc_counter_clear(&timer);
+    nrf_drv_rtc_cc_set(&timer, 0, b_period[period_counter], true);
+    
     NRF_LOG_INFO("Blinking frequency changed");
     NRF_LOG_FLUSH();
 }
@@ -212,7 +195,6 @@ void TEMP_IRQHandler(void)
     NRF_TEMP->EVENTS_DATARDY = 0;
     NRF_TEMP->TASKS_STOP = 1;   // Need to stop temp manually according to documentation
     NRF_LOG_FLUSH();
-//    printf("Actual temperature: %d\n\n", (int)temp);  // ??
 }
 
 void saadc_callback(nrf_drv_saadc_evt_t const * p_event)
@@ -230,7 +212,6 @@ void saadc_callback(nrf_drv_saadc_evt_t const * p_event)
         for (i = 0; i < SAMPLES_IN_BUFFER; i++)
         {
             NRF_LOG_INFO("ADC Value: %d", p_event->data.done.p_buffer[i]);
-//            NRF_LOG_INFO("DID");
         }
         m_adc_evt_counter++;
         NRF_LOG_FLUSH();
@@ -256,28 +237,6 @@ void saadc_init(void)
 }
 
 
-void saadc_sampling_event_init(void)
-{
-    ret_code_t err_code;
-
-
-    uint32_t timer_compare_event_addr = nrf_drv_timer_compare_event_address_get(&timer1, NRF_TIMER_CC_CHANNEL1);
-    uint32_t saadc_sample_task_addr   = nrf_drv_saadc_sample_task_get();
-
-    nrf_ppi_channel_t     m_ppi_channel;
-    /* setup ppi channel so that timer compare event is triggering sample task in SAADC */
-    err_code = nrf_drv_ppi_channel_alloc(&m_ppi_channel);
-    APP_ERROR_CHECK(err_code);
-
-    err_code = nrf_drv_ppi_channel_assign(m_ppi_channel,
-                                          timer_compare_event_addr,
-                                          saadc_sample_task_addr);
-    APP_ERROR_CHECK(err_code);
-
-    err_code = nrf_drv_ppi_channel_enable(m_ppi_channel);
-    APP_ERROR_CHECK(err_code);
-}
-
 static void lfclk_config(void)
 {
     ret_code_t err_code = nrf_drv_clock_init();
@@ -285,6 +244,38 @@ static void lfclk_config(void)
 
     nrf_drv_clock_lfclk_request(NULL);
 }
+
+static void temp_timer_h(void * p_context)
+{
+    //nrf_drv_gpiote_out_toggle(LED_1);
+    NRF_TEMP->TASKS_START = 1;
+}
+
+static void saadc_timer_h(void * p_context)
+{
+    //nrf_drv_gpiote_out_toggle(LED_1);
+    nrf_drv_saadc_sample();
+}
+
+
+static void create_timers()
+{
+    ret_code_t err_code;
+
+    // Create timers
+    err_code = app_timer_create(&temp_timer_id,
+                                APP_TIMER_MODE_REPEATED,
+                                temp_timer_h);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = app_timer_create(&saadc_timer_id,
+                                APP_TIMER_MODE_REPEATED,
+                                saadc_timer_h);
+    APP_ERROR_CHECK(err_code);
+}
+
+
+
 
 
 /**
@@ -300,12 +291,9 @@ int main(void)
 
     ret_code_t err_code;
 
-//    err_code = nrf_drv_clock_init();
-//    APP_ERROR_CHECK(err_code);
-//
-//    nrf_drv_clock_lfclk_request(NULL);
-
     lfclk_config();
+
+    app_timer_init();
 
     err_code = nrf_drv_ppi_init();
     APP_ERROR_CHECK(err_code);
@@ -313,21 +301,17 @@ int main(void)
     err_code = nrf_drv_gpiote_init();
     APP_ERROR_CHECK(err_code);
 
-
-//    nrf_drv_rtc_config_t timer_cfg = NRF_DRV_RTC_DEFAULT_CONFIG;
-//    err_code = nrf_drv_rtc_init(&timer, &timer_cfg, rtc_handler);
-//    APP_ERROR_CHECK(err_code);
-
     nrf_drv_rtc_config_t config = NRF_DRV_RTC_DEFAULT_CONFIG;
-    config.prescaler = 4095;
     err_code = nrf_drv_rtc_init(&timer, &config, rtc_handler);
     APP_ERROR_CHECK(err_code);
 
     nrfx_rtc_int_enable(&timer,NRFX_RTC_INT_COMPARE0);
 
-    nrf_drv_timer_config_t timer1_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
-    err_code = nrf_drv_timer_init(&timer1, &timer1_cfg, timer1_dummy_handler);
-    APP_ERROR_CHECK(err_code);
+    //nrf_drv_timer_config_t timer1_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
+    //err_code = nrf_drv_timer_init(&timer1, &timer1_cfg, timer1_dummy_handler);
+    //APP_ERROR_CHECK(err_code);
+
+    create_timers();
 
     // Setup PPI channel with event from TIMER compare and task GPIOTE pin toggle.
     led_blinking_setup();
@@ -335,10 +319,14 @@ int main(void)
     temp_setup();
 
     saadc_init();
-    saadc_sampling_event_init();
+    //saadc_sampling_event_init();
     // Enable timer
+    err_code = app_timer_start(temp_timer_id, APP_TIMER_TICKS(2000), NULL);
+    APP_ERROR_CHECK(err_code);
+    err_code = app_timer_start(saadc_timer_id, APP_TIMER_TICKS(2000), NULL);
+    APP_ERROR_CHECK(err_code);
     nrf_drv_rtc_enable(&timer);
-    nrf_drv_timer_enable(&timer1);
+    //nrf_drv_timer_enable(&timer1);
 
     // Enable button-press detection button1
     gpio_init();
