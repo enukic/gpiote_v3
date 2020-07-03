@@ -32,9 +32,15 @@
 #ifdef BSP_LED_0
     #define GPIO_OUTPUT_PIN_NUMBER BSP_LED_0  /**< Pin number for output. */
 #endif
-#ifndef GPIO_OUTPUT_PIN_NUMBER
-    #error "Please indicate output pin"
-#endif
+
+#define ADC_REF_VOLTAGE_IN_MILLIVOLTS     600                                          /**< Reference voltage (in milli volts) used by ADC while doing conversion. */
+#define ADC_PRE_SCALING_COMPENSATION      6                                            /**< The ADC is configured to use VDD with 1/3 prescaling as input. And hence the result of conversion is to be multiplied by 3 to get the actual value of the battery voltage.*/
+#define DIODE_FWD_VOLT_DROP_MILLIVOLTS    270                                          /**< Typical forward voltage drop of the diode that is connected in series with the voltage supply. This is the voltage drop when the forward current is 1mA. Source: Data sheet of 'SURFACE MOUNT SCHOTTKY BARRIER DIODE ARRAY' available at www.diodes.com. */
+#define ADC_RES_8BIT                     255   
+
+#define ADC_RESULT_IN_MILLI_VOLTS(ADC_VALUE)\
+        ((((ADC_VALUE) * ADC_REF_VOLTAGE_IN_MILLIVOLTS) / ADC_RES_8BIT) * ADC_PRE_SCALING_COMPENSATION)
+
 
 static nrf_saadc_value_t     m_buffer_pool[2][SAMPLES_IN_BUFFER];
 static nrf_saadc_value_t     m_adc_value;
@@ -51,7 +57,6 @@ uint32_t period_counter = 0;
 int32_t volatile temp;
 
 static nrf_drv_rtc_t timer = NRF_DRV_RTC_INSTANCE(0);
-//static nrf_drv_timer_t timer1 = NRF_DRV_TIMER_INSTANCE(1); // 2nd timer instance for temp
 
 void rtc_handler(nrf_drv_rtc_int_type_t int_type){
     nrf_drv_rtc_counter_clear(&timer);
@@ -59,8 +64,6 @@ void rtc_handler(nrf_drv_rtc_int_type_t int_type){
     nrf_drv_rtc_cc_set(&timer,0,b_period[period_counter],true);
 }
 
-
-//void timer1_dummy_handler(nrf_timer_event_t event_type, void * p_context){}
 
 static void led_blinking_setup()
 {
@@ -74,15 +77,14 @@ static void led_blinking_setup()
     APP_ERROR_CHECK(err_code);
 
 
-//    nrf_drv_rtc_cc_set(&timer, 0, 1000, true);
     err_code = nrf_drv_rtc_cc_set(&timer,0,32768,true);
     APP_ERROR_CHECK(err_code);
 
     err_code = nrf_drv_ppi_channel_alloc(&ppi_channel);
     APP_ERROR_CHECK(err_code);
 
-//    compare_evt_addr = nrf_drv_rtc_event_address_get(&timer, NRF_RTC_EVENT_COMPARE_0 );
-    compare_evt_addr = 0x4000B000 + 0x140;
+    compare_evt_addr = nrf_drv_rtc_event_address_get(&timer, NRF_RTC_EVENT_COMPARE_0 );
+    //compare_evt_addr = 0x4000B000 + 0x140;
     gpiote_task_addr = nrf_drv_gpiote_out_task_addr_get(GPIO_OUTPUT_PIN_NUMBER);
 
     err_code = nrf_drv_ppi_channel_assign(ppi_channel, compare_evt_addr, gpiote_task_addr);
@@ -208,10 +210,10 @@ void saadc_callback(nrf_drv_saadc_evt_t const * p_event)
 
         int i;
         NRF_LOG_INFO("ADC event number: %d", (int)m_adc_evt_counter);
-
         for (i = 0; i < SAMPLES_IN_BUFFER; i++)
         {
-            NRF_LOG_INFO("ADC Value: %d", p_event->data.done.p_buffer[i]);
+            
+            NRF_LOG_INFO("ADC Value: %d mV", ADC_RESULT_IN_MILLI_VOLTS(p_event->data.done.p_buffer[i]));
         }
         m_adc_evt_counter++;
         NRF_LOG_FLUSH();
@@ -247,13 +249,11 @@ static void lfclk_config(void)
 
 static void temp_timer_h(void * p_context)
 {
-    //nrf_drv_gpiote_out_toggle(LED_1);
     NRF_TEMP->TASKS_START = 1;
 }
 
 static void saadc_timer_h(void * p_context)
 {
-    //nrf_drv_gpiote_out_toggle(LED_1);
     nrf_drv_saadc_sample();
 }
 
@@ -307,10 +307,6 @@ int main(void)
 
     nrfx_rtc_int_enable(&timer,NRFX_RTC_INT_COMPARE0);
 
-    //nrf_drv_timer_config_t timer1_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
-    //err_code = nrf_drv_timer_init(&timer1, &timer1_cfg, timer1_dummy_handler);
-    //APP_ERROR_CHECK(err_code);
-
     create_timers();
 
     // Setup PPI channel with event from TIMER compare and task GPIOTE pin toggle.
@@ -319,14 +315,12 @@ int main(void)
     temp_setup();
 
     saadc_init();
-    //saadc_sampling_event_init();
     // Enable timer
     err_code = app_timer_start(temp_timer_id, APP_TIMER_TICKS(2000), NULL);
     APP_ERROR_CHECK(err_code);
     err_code = app_timer_start(saadc_timer_id, APP_TIMER_TICKS(2000), NULL);
     APP_ERROR_CHECK(err_code);
     nrf_drv_rtc_enable(&timer);
-    //nrf_drv_timer_enable(&timer1);
 
     // Enable button-press detection button1
     gpio_init();
