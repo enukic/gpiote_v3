@@ -3971,6 +3971,7 @@ Discarded input sections
  .bss           0x0000000000000000        0x0 Output/gpiote_pca10040 Debug/Obj/main.o
  .bss.m_adc_value
                 0x0000000000000000        0x2 Output/gpiote_pca10040 Debug/Obj/main.o
+ .bss.voltage   0x0000000000000000        0x2 Output/gpiote_pca10040 Debug/Obj/main.o
  .debug_types   0x0000000000000000       0xf5 Output/gpiote_pca10040 Debug/Obj/main.o
  .debug_types   0x0000000000000000       0x64 Output/gpiote_pca10040 Debug/Obj/main.o
  .debug_types   0x0000000000000000       0x89 Output/gpiote_pca10040 Debug/Obj/main.o
@@ -7933,7 +7934,7 @@ Linker script and memory map
                 0x0000000020000048        0xc Output/gpiote_pca10040 Debug/Obj/main.o
                 0x0000000020000048                b_period
  .data.timer    0x0000000020000054        0x8 Output/gpiote_pca10040 Debug/Obj/main.o
- .data.seq_values.11169
+ .data.seq_values.11170
                 0x000000002000005c        0xa Output/gpiote_pca10040 Debug/Obj/main.o
  *fill*         0x0000000020000066        0x2 
  .data.SystemCoreClock
@@ -8317,7 +8318,7 @@ OUTPUT(Output/Debug/Exe/gpiote_pca10040.elf elf32-littlearm)
  .debug_line    0x00000000000109ac       0x8b Output/gpiote_pca10040 Debug/Obj/ses_startup_nrf_common.o
  .debug_line    0x0000000000010a37      0x7c2 Output/gpiote_pca10040 Debug/Obj/system_nrf52.o
 
-.debug_info     0x0000000000000000    0x1074e
+.debug_info     0x0000000000000000    0x10762
  .debug_info    0x0000000000000000       0x22 Output/gpiote_pca10040 Debug/Obj/thumb_crt0.o
  .debug_info    0x0000000000000022     0x15b5 Output/gpiote_pca10040 Debug/Obj/nrf_log_frontend.o
  .debug_info    0x00000000000015d7      0x45e Output/gpiote_pca10040 Debug/Obj/nrf_log_default_backends.o
@@ -8346,11 +8347,11 @@ OUTPUT(Output/Debug/Exe/gpiote_pca10040.elf elf32-littlearm)
  .debug_info    0x000000000000c7b5      0xc89 Output/gpiote_pca10040 Debug/Obj/nrfx_rtc.o
  .debug_info    0x000000000000d43e      0x969 Output/gpiote_pca10040 Debug/Obj/nrfx_clock.o
  .debug_info    0x000000000000dda7      0x8a9 Output/gpiote_pca10040 Debug/Obj/nrfx_power.o
- .debug_info    0x000000000000e650      0xf1a Output/gpiote_pca10040 Debug/Obj/main.o
- .debug_info    0x000000000000f56a      0xeb7 Output/gpiote_pca10040 Debug/Obj/SEGGER_RTT.o
- .debug_info    0x0000000000010421       0x26 Output/gpiote_pca10040 Debug/Obj/ses_startup_nrf52.o
- .debug_info    0x0000000000010447       0x26 Output/gpiote_pca10040 Debug/Obj/ses_startup_nrf_common.o
- .debug_info    0x000000000001046d      0x2e1 Output/gpiote_pca10040 Debug/Obj/system_nrf52.o
+ .debug_info    0x000000000000e650      0xf2e Output/gpiote_pca10040 Debug/Obj/main.o
+ .debug_info    0x000000000000f57e      0xeb7 Output/gpiote_pca10040 Debug/Obj/SEGGER_RTT.o
+ .debug_info    0x0000000000010435       0x26 Output/gpiote_pca10040 Debug/Obj/ses_startup_nrf52.o
+ .debug_info    0x000000000001045b       0x26 Output/gpiote_pca10040 Debug/Obj/ses_startup_nrf_common.o
+ .debug_info    0x0000000000010481      0x2e1 Output/gpiote_pca10040 Debug/Obj/system_nrf52.o
 
 .debug_abbrev   0x0000000000000000     0x55b8
  .debug_abbrev  0x0000000000000000       0x12 Output/gpiote_pca10040 Debug/Obj/thumb_crt0.o
@@ -8455,7 +8456,7 @@ OUTPUT(Output/Debug/Exe/gpiote_pca10040.elf elf32-littlearm)
  .debug_aranges
                 0x00000000000013d0       0x88 Output/gpiote_pca10040 Debug/Obj/system_nrf52.o
 
-.debug_str      0x0000000000000000    0x86efb
+.debug_str      0x0000000000000000    0x86ee1
  .debug_str     0x0000000000000000       0x98 Output/gpiote_pca10040 Debug/Obj/thumb_crt0.o
  .debug_str     0x0000000000000098    0x715ac Output/gpiote_pca10040 Debug/Obj/nrf_log_frontend.o
                                       0x73542 (size before relaxing)
@@ -8511,15 +8512,15 @@ OUTPUT(Output/Debug/Exe/gpiote_pca10040.elf elf32-littlearm)
                                       0x79769 (size before relaxing)
  .debug_str     0x00000000000824de      0xb0a Output/gpiote_pca10040 Debug/Obj/nrfx_power.o
                                       0x76871 (size before relaxing)
- .debug_str     0x0000000000082fe8     0x36c6 Output/gpiote_pca10040 Debug/Obj/main.o
-                                      0x80c56 (size before relaxing)
- .debug_str     0x00000000000866ae      0x54d Output/gpiote_pca10040 Debug/Obj/SEGGER_RTT.o
+ .debug_str     0x0000000000082fe8     0x36ac Output/gpiote_pca10040 Debug/Obj/main.o
+                                      0x80c3c (size before relaxing)
+ .debug_str     0x0000000000086694      0x54d Output/gpiote_pca10040 Debug/Obj/SEGGER_RTT.o
                                       0x67761 (size before relaxing)
- .debug_str     0x0000000000086bfb       0x63 Output/gpiote_pca10040 Debug/Obj/ses_startup_nrf52.o
+ .debug_str     0x0000000000086be1       0x63 Output/gpiote_pca10040 Debug/Obj/ses_startup_nrf52.o
                                          0x71 (size before relaxing)
- .debug_str     0x0000000000086c5e       0x31 Output/gpiote_pca10040 Debug/Obj/ses_startup_nrf_common.o
+ .debug_str     0x0000000000086c44       0x31 Output/gpiote_pca10040 Debug/Obj/ses_startup_nrf_common.o
                                          0x76 (size before relaxing)
- .debug_str     0x0000000000086c8f      0x26c Output/gpiote_pca10040 Debug/Obj/system_nrf52.o
+ .debug_str     0x0000000000086c75      0x26c Output/gpiote_pca10040 Debug/Obj/system_nrf52.o
                                       0x5bbd8 (size before relaxing)
 
 .debug_ranges   0x0000000000000000     0x1260
@@ -8746,7 +8747,7 @@ OUTPUT(Output/Debug/Exe/gpiote_pca10040.elf elf32-littlearm)
  .debug_types   0x0000000000006397       0xad Output/gpiote_pca10040 Debug/Obj/system_nrf52.o
 
 .debug_pubnames
-                0x0000000000000000     0x8e8e
+                0x0000000000000000     0x8ea6
  .debug_pubnames
                 0x0000000000000000      0x5e9 Output/gpiote_pca10040 Debug/Obj/nrf_log_frontend.o
  .debug_pubnames
@@ -8802,11 +8803,11 @@ OUTPUT(Output/Debug/Exe/gpiote_pca10040.elf elf32-littlearm)
  .debug_pubnames
                 0x00000000000067d2      0xaa8 Output/gpiote_pca10040 Debug/Obj/nrfx_power.o
  .debug_pubnames
-                0x000000000000727a     0x1732 Output/gpiote_pca10040 Debug/Obj/main.o
+                0x000000000000727a     0x174a Output/gpiote_pca10040 Debug/Obj/main.o
  .debug_pubnames
-                0x00000000000089ac      0x3c3 Output/gpiote_pca10040 Debug/Obj/SEGGER_RTT.o
+                0x00000000000089c4      0x3c3 Output/gpiote_pca10040 Debug/Obj/SEGGER_RTT.o
  .debug_pubnames
-                0x0000000000008d6f      0x11f Output/gpiote_pca10040 Debug/Obj/system_nrf52.o
+                0x0000000000008d87      0x11f Output/gpiote_pca10040 Debug/Obj/system_nrf52.o
 
 .debug_pubtypes
                 0x0000000000000000     0x474b
@@ -8871,7 +8872,7 @@ OUTPUT(Output/Debug/Exe/gpiote_pca10040.elf elf32-littlearm)
  .debug_pubtypes
                 0x00000000000045fb      0x150 Output/gpiote_pca10040 Debug/Obj/system_nrf52.o
 
-.debug_macro    0x0000000000000000    0x19575
+.debug_macro    0x0000000000000000    0x1956f
  .debug_macro   0x0000000000000000      0x293 Output/gpiote_pca10040 Debug/Obj/nrf_log_frontend.o
  .debug_macro   0x0000000000000293      0xaf6 Output/gpiote_pca10040 Debug/Obj/nrf_log_frontend.o
  .debug_macro   0x0000000000000d89      0x1a3 Output/gpiote_pca10040 Debug/Obj/nrf_log_frontend.o
@@ -8981,18 +8982,18 @@ OUTPUT(Output/Debug/Exe/gpiote_pca10040.elf elf32-littlearm)
  .debug_macro   0x0000000000018562      0x2ca Output/gpiote_pca10040 Debug/Obj/nrfx_clock.o
  .debug_macro   0x000000000001882c      0x21d Output/gpiote_pca10040 Debug/Obj/nrfx_power.o
  .debug_macro   0x0000000000018a49       0x2e Output/gpiote_pca10040 Debug/Obj/nrfx_power.o
- .debug_macro   0x0000000000018a77      0x45a Output/gpiote_pca10040 Debug/Obj/main.o
- .debug_macro   0x0000000000018ed1       0x11 Output/gpiote_pca10040 Debug/Obj/main.o
- .debug_macro   0x0000000000018ee2       0x22 Output/gpiote_pca10040 Debug/Obj/main.o
- .debug_macro   0x0000000000018f04       0x10 Output/gpiote_pca10040 Debug/Obj/main.o
- .debug_macro   0x0000000000018f14       0x94 Output/gpiote_pca10040 Debug/Obj/main.o
- .debug_macro   0x0000000000018fa8       0xcc Output/gpiote_pca10040 Debug/Obj/main.o
- .debug_macro   0x0000000000019074       0xbe Output/gpiote_pca10040 Debug/Obj/main.o
- .debug_macro   0x0000000000019132       0x10 Output/gpiote_pca10040 Debug/Obj/main.o
- .debug_macro   0x0000000000019142       0x16 Output/gpiote_pca10040 Debug/Obj/main.o
- .debug_macro   0x0000000000019158       0x94 Output/gpiote_pca10040 Debug/Obj/main.o
- .debug_macro   0x00000000000191ec       0x42 Output/gpiote_pca10040 Debug/Obj/main.o
- .debug_macro   0x000000000001922e       0xb2 Output/gpiote_pca10040 Debug/Obj/main.o
- .debug_macro   0x00000000000192e0      0x19b Output/gpiote_pca10040 Debug/Obj/SEGGER_RTT.o
- .debug_macro   0x000000000001947b       0x47 Output/gpiote_pca10040 Debug/Obj/SEGGER_RTT.o
- .debug_macro   0x00000000000194c2       0xb3 Output/gpiote_pca10040 Debug/Obj/system_nrf52.o
+ .debug_macro   0x0000000000018a77      0x454 Output/gpiote_pca10040 Debug/Obj/main.o
+ .debug_macro   0x0000000000018ecb       0x11 Output/gpiote_pca10040 Debug/Obj/main.o
+ .debug_macro   0x0000000000018edc       0x22 Output/gpiote_pca10040 Debug/Obj/main.o
+ .debug_macro   0x0000000000018efe       0x10 Output/gpiote_pca10040 Debug/Obj/main.o
+ .debug_macro   0x0000000000018f0e       0x94 Output/gpiote_pca10040 Debug/Obj/main.o
+ .debug_macro   0x0000000000018fa2       0xcc Output/gpiote_pca10040 Debug/Obj/main.o
+ .debug_macro   0x000000000001906e       0xbe Output/gpiote_pca10040 Debug/Obj/main.o
+ .debug_macro   0x000000000001912c       0x10 Output/gpiote_pca10040 Debug/Obj/main.o
+ .debug_macro   0x000000000001913c       0x16 Output/gpiote_pca10040 Debug/Obj/main.o
+ .debug_macro   0x0000000000019152       0x94 Output/gpiote_pca10040 Debug/Obj/main.o
+ .debug_macro   0x00000000000191e6       0x42 Output/gpiote_pca10040 Debug/Obj/main.o
+ .debug_macro   0x0000000000019228       0xb2 Output/gpiote_pca10040 Debug/Obj/main.o
+ .debug_macro   0x00000000000192da      0x19b Output/gpiote_pca10040 Debug/Obj/SEGGER_RTT.o
+ .debug_macro   0x0000000000019475       0x47 Output/gpiote_pca10040 Debug/Obj/SEGGER_RTT.o
+ .debug_macro   0x00000000000194bc       0xb3 Output/gpiote_pca10040 Debug/Obj/system_nrf52.o

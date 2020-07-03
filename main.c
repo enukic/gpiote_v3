@@ -33,10 +33,9 @@
     #define GPIO_OUTPUT_PIN_NUMBER BSP_LED_0  /**< Pin number for output. */
 #endif
 
-#define ADC_REF_VOLTAGE_IN_MILLIVOLTS     600                                          /**< Reference voltage (in milli volts) used by ADC while doing conversion. */
-#define ADC_PRE_SCALING_COMPENSATION      6                                            /**< The ADC is configured to use VDD with 1/3 prescaling as input. And hence the result of conversion is to be multiplied by 3 to get the actual value of the battery voltage.*/
-#define DIODE_FWD_VOLT_DROP_MILLIVOLTS    270                                          /**< Typical forward voltage drop of the diode that is connected in series with the voltage supply. This is the voltage drop when the forward current is 1mA. Source: Data sheet of 'SURFACE MOUNT SCHOTTKY BARRIER DIODE ARRAY' available at www.diodes.com. */
-#define ADC_RES_8BIT                     255   
+#define ADC_REF_VOLTAGE_IN_MILLIVOLTS     600      /**< Reference voltage (in milli volts) used by ADC while doing conversion. */
+#define ADC_PRE_SCALING_COMPENSATION      6        /**< The ADC is configured to use VDD with 1/3 prescaling as input. And hence the result of conversion is to be multiplied by 3 to get the actual value of the battery voltage.*/
+#define ADC_RES_8BIT                     1023   
 
 #define ADC_RESULT_IN_MILLI_VOLTS(ADC_VALUE)\
         ((((ADC_VALUE) * ADC_REF_VOLTAGE_IN_MILLIVOLTS) / ADC_RES_8BIT) * ADC_PRE_SCALING_COMPENSATION)
@@ -45,6 +44,7 @@
 static nrf_saadc_value_t     m_buffer_pool[2][SAMPLES_IN_BUFFER];
 static nrf_saadc_value_t     m_adc_value;
 static uint32_t              m_adc_evt_counter;
+uint16_t voltage;
 
 static nrf_drv_pwm_t m_pwm0 = NRF_DRV_PWM_INSTANCE(0); // Added in
 
@@ -199,11 +199,15 @@ void TEMP_IRQHandler(void)
     NRF_LOG_FLUSH();
 }
 
+
+
+
 void saadc_callback(nrf_drv_saadc_evt_t const * p_event)
 {
     if (p_event->type == NRF_DRV_SAADC_EVT_DONE)
     {
         ret_code_t err_code;
+        
 
         err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
         APP_ERROR_CHECK(err_code);
@@ -212,7 +216,6 @@ void saadc_callback(nrf_drv_saadc_evt_t const * p_event)
         NRF_LOG_INFO("ADC event number: %d", (int)m_adc_evt_counter);
         for (i = 0; i < SAMPLES_IN_BUFFER; i++)
         {
-            
             NRF_LOG_INFO("ADC Value: %d mV", ADC_RESULT_IN_MILLI_VOLTS(p_event->data.done.p_buffer[i]));
         }
         m_adc_evt_counter++;
